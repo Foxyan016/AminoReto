@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <title>AminoReto</title>
+  <meta name="theme-color" content="#4a90e2">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --bg-color: #f0f8ff;
+      --text-color: #222;
+      --button-bg: #4a90e2;
+      --button-hover: #357ABD;
+      --card-bg: #ffffff;
+    }
+
+    body.dark {
+      --bg-color: #1b1b1b;
+      --text-color: #e0e0e0;
+      --button-bg: #5050d5;
+      --button-hover: #6262ff;
+      --card-bg: #2a2a2a;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Verdana', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 20px 10px;
+    }
+
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      font-family: 'Georgia', serif;
+    }
+
+    .tabs {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .tabs button {
+      margin: 0 8px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: var(--button-bg);
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tabs button.active {
+      background-color: var(--button-hover);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    button.action {
+      background-color: var(--button-bg);
+      color: white;
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+
+    button.action:hover {
+      background-color: var(--button-hover);
+      transform: scale(1.05);
+    }
+
+    img#imagen {
+      display: none;
+      max-width: 80%;
+      height: auto;
+      margin: 30px auto;
+      border: 3px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+    #imagen {
+      background-color: white;
+      padding: 10px;
+      border-radius: 10px;
+      display: none;
+      max-width: 80%;
+      margin: 30px auto;
+      display: block;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);}
+
+    .quiz-options {
+      margin-top: 20px;
+    }
+
+    .quiz-options button {
+      display: block;
+      width: 100%;
+      margin: 8px auto;
+      font-size: 18px;
+    }
+
+    .dark-toggle {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-color);
+    }
+
+    .botones-clasico,.botones-quiz {
+      display: flex;
+     justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <button class="dark-toggle" onclick="toggleDark()">🌙/☀️</button>
+
+  <header>
+    <h1>🧪 AminoReto</h1>
+  </header>
+
+  <div class="tabs">
+    <button onclick="cambiarTab('modoClásico')" id="tab1" class="active">Modo clásico</button>
+    <button onclick="cambiarTab('modoQuiz')" id="tab2">Modo Quiz</button>
+  </div>
+
+  <div id="modoClásico" class="tab-content active">
+    <div class="botones-clasico"><button class="action" onclick="mostrarLetra()">Mostrar Letra</button><button class="action" onclick="mostrarSolucion()">Mostrar Solución</button></div>
+    <div id="letra" style="font-size: 60px; margin: 20px;">🎲</div>
+    <div id="solucion" style="font-family: 'Times New Roman', serif; font-size: 24px;"></div>
+    <img id="imagen" src="" alt="Aminoácido">
+  </div>
+
+  <div id="modoQuiz" class="tab-content">
+    <div class="botones-quiz"><button class="action" onclick="iniciarQuiz()">Nueva pregunta</button></div>
+    <div id="letraQuiz" style="font-size: 60px; margin: 20px;"></div>
+    <div class="quiz-options" id="quizOpciones"></div>
+    <div id="resultado" style="margin-top: 15px; font-size: 20px;"></div>
+  </div>
+
+  <script>
+    const aminoacidos = [
+      { letra: 'A', nombre: 'Alanina', codigo: 'Ala', imagen: 'imagenes/Ala.png' },
+      { letra: 'R', nombre: 'Arginina', codigo: 'Arg', imagen: 'imagenes/Arg.png' },
+      { letra: 'N', nombre: 'Asparagina', codigo: 'Asn', imagen: 'imagenes/Asn.png' },
+      { letra: 'D', nombre: 'Ácido aspártico', codigo: 'Asp', imagen: 'imagenes/Asp.png' },
+      { letra: 'C', nombre: 'Cisteína', codigo: 'Cys', imagen: 'imagenes/Cys.png' },
+      { letra: 'E', nombre: 'Ácido glutámico', codigo: 'Glu', imagen: 'imagenes/Glu.png' },
+      { letra: 'Q', nombre: 'Glutamina', codigo: 'Gln', imagen: 'imagenes/Gln.png' },
+      { letra: 'G', nombre: 'Glicina', codigo: 'Gly', imagen: 'imagenes/Gly.png' },
+      { letra: 'H', nombre: 'Histidina', codigo: 'His', imagen: 'imagenes/His.png' },
+      { letra: 'I', nombre: 'Isoleucina', codigo: 'Ile', imagen: 'imagenes/Ile.png' },
+      { letra: 'L', nombre: 'Leucina', codigo: 'Leu', imagen: 'imagenes/Leu.png' },
+      { letra: 'K', nombre: 'Lisina', codigo: 'Lys', imagen: 'imagenes/Lys.png' },
+      { letra: 'M', nombre: 'Metionina', codigo: 'Met', imagen: 'imagenes/Met.png' },
+      { letra: 'F', nombre: 'Fenilalanina', codigo: 'Phe', imagen: 'imagenes/Phe.png' },
+      { letra: 'P', nombre: 'Prolina', codigo: 'Pro', imagen: 'imagenes/Pro.png' },
+      { letra: 'S', nombre: 'Serina', codigo: 'Ser', imagen: 'imagenes/Ser.png' },
+      { letra: 'T', nombre: 'Treonina', codigo: 'Thr', imagen: 'imagenes/Thr.png' },
+      { letra: 'W', nombre: 'Triptófano', codigo: 'Trp', imagen: 'imagenes/Trp.png' },
+      { letra: 'Y', nombre: 'Tirosina', codigo: 'Tyr', imagen: 'imagenes/Tyr.png' },
+      { letra: 'V', nombre: 'Valina', codigo: 'Val', imagen: 'imagenes/Val.png' }
+    ];
+
+    let seleccionado = null;
+    let anterior = null;
+
+    function mostrarLetra() {
+      let indice;
+      do {
+        indice = Math.floor(Math.random() * aminoacidos.length);
+      } while (aminoacidos[indice].letra === anterior);
+      seleccionado = aminoacidos[indice];
+      anterior = seleccionado.letra;
+
+      document.getElementById("letra").innerText = seleccionado.letra;
+      document.getElementById("solucion").innerText = '';
+      document.getElementById("imagen").style.display = 'none';
+    }
+
+    function mostrarSolucion() {
+      if (seleccionado) {
+        document.getElementById("solucion").innerText = `${seleccionado.nombre} (${seleccionado.codigo})`;
+        const img = document.getElementById("imagen");
+        img.src = seleccionado.imagen;
+        img.alt = seleccionado.nombre;
+        img.style.display = 'block';
+      }
+    }
+
+    function cambiarTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+
+      document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+      function cambiarTab(tabId) {
+  // Ocultar todos los contenidos
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+
+  // Quitar clase activa de todos los botones
+  document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+
+  // Activar el botón correcto
+  if (tabId === 'modoClásico') {
+    document.getElementById('tab1').classList.add('active');
+  } else if (tabId === 'modoQuiz') {
+    document.getElementById('tab2').classList.add('active');
+  }
+}
+    }
+
+    function toggleDark() {
+      document.body.classList.toggle('dark');
+    }
+
+    // ---------- MODO QUIZ ----------
+    let respuestaCorrecta = null;
+
+    function iniciarQuiz() {
+      const indice = Math.floor(Math.random() * aminoacidos.length);
+      respuestaCorrecta = aminoacidos[indice];
+
+      document.getElementById("letraQuiz").innerText = respuestaCorrecta.letra;
+      document.getElementById("resultado").innerText = '';
+      
+      // Elegir otras 2 opciones falsas y mezclar
+      const opciones = [respuestaCorrecta];
+      while (opciones.length < 3) {
+        const falsa = aminoacidos[Math.floor(Math.random() * aminoacidos.length)];
+        if (!opciones.includes(falsa)) {
+          opciones.push(falsa);
+        }
+      }
+
+      // Mezclar las 3 opciones
+      opciones.sort(() => Math.random() - 0.5);
+
+      // Mostrar botones
+      const contenedor = document.getElementById("quizOpciones");
+      contenedor.innerHTML = '';
+      opciones.forEach(op => {
+        const btn = document.createElement("button");
+        btn.className = 'action';
+        btn.innerText = `${op.nombre} (${op.codigo})`;
+        btn.onclick = () => comprobarRespuesta(op);
+        contenedor.appendChild(btn);
+      });
+    }
+
+    function comprobarRespuesta(opcionSeleccionada) {
+      const res = document.getElementById("resultado");
+      if (opcionSeleccionada === respuestaCorrecta) {
+        res.innerText = "✅ ¡Correcto!";
+        res.style.color = "green";
+      } else {
+        res.innerText = `❌ Incorrecto. Era: ${respuestaCorrecta.nombre} (${respuestaCorrecta.codigo})`;
+        res.style.color = "red";
+      }
+    }
+  </script>
+</body>
+</html>
